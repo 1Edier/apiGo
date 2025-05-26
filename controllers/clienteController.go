@@ -1,4 +1,4 @@
-//controller/clienteController
+
 package controllers
 
 import (
@@ -10,7 +10,7 @@ import (
 	"server/utils"
 )
 
-// GetClientes maneja la petición para obtener todos los clientes
+
 func GetClientes(w http.ResponseWriter, r *http.Request) {
 	clientes, err := utils.GetClientes()
 	if err != nil {
@@ -22,7 +22,7 @@ func GetClientes(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(clientes)
 }
 
-// GetClientesConValidacion obtiene todos los clientes con información de validación
+
 func GetClientesConValidacion(w http.ResponseWriter, r *http.Request) {
 	clientesConErrores, err := utils.GetClientesConErrores()
 	if err != nil {
@@ -34,7 +34,7 @@ func GetClientesConValidacion(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(clientesConErrores)
 }
 
-// GetClientesConErrores obtiene solo los clientes que tienen errores de validación
+
 func GetClientesConErrores(w http.ResponseWriter, r *http.Request) {
 	clientesConErrores, err := utils.GetClientesConErroresSolo()
 	if err != nil {
@@ -46,7 +46,7 @@ func GetClientesConErrores(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(clientesConErrores)
 }
 
-// BuscarClientes maneja la petición para buscar clientes
+
 func BuscarClientes(w http.ResponseWriter, r *http.Request) {
 	termino := r.URL.Query().Get("q")
 	if termino == "" {
@@ -64,7 +64,7 @@ func BuscarClientes(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(clientes)
 }
 
-// BuscarClientesConValidacion busca clientes y retorna con información de validación
+
 func BuscarClientesConValidacion(w http.ResponseWriter, r *http.Request) {
 	termino := r.URL.Query().Get("q")
 	if termino == "" {
@@ -82,7 +82,7 @@ func BuscarClientesConValidacion(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(clientesConErrores)
 }
 
-// GetClientePorClave maneja la petición para obtener un cliente por clave
+
 func GetClientePorClave(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	clave := vars["clave"]
@@ -102,7 +102,7 @@ func GetClientePorClave(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(cliente)
 }
 
-// CrearCliente maneja la petición para crear un nuevo cliente
+
 func CrearCliente(w http.ResponseWriter, r *http.Request) {
 	var cliente models.Cliente
 	if err := json.NewDecoder(r.Body).Decode(&cliente); err != nil {
@@ -110,7 +110,7 @@ func CrearCliente(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	// Validar datos del cliente
+	
 	errores := utils.ValidarCliente(cliente)
 	if len(errores) > 0 {
 		w.Header().Set("Content-Type", "application/json")
@@ -132,7 +132,7 @@ func CrearCliente(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"mensaje": "Cliente creado con éxito"})
 }
 
-// ActualizarCliente maneja la petición para actualizar un cliente existente
+
 func ActualizarCliente(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	clave := vars["clave"]
@@ -143,7 +143,7 @@ func ActualizarCliente(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	// Validar datos del cliente
+	
 	errores := utils.ValidarCliente(cliente)
 	if len(errores) > 0 {
 		w.Header().Set("Content-Type", "application/json")
@@ -164,7 +164,7 @@ func ActualizarCliente(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"mensaje": "Cliente actualizado con éxito"})
 }
 
-// EliminarCliente maneja la petición para eliminar un cliente
+
 func EliminarCliente(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	clave := vars["clave"]

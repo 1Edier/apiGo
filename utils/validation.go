@@ -1,33 +1,32 @@
-//utils/validation.go
+
 package utils
 
 import (
-	
 	"regexp"
 	"strings"
 	"server/models"
 )
 
-// ErrorCampo representa un error en un campo específico
+
 type ErrorCampo struct {
 	Campo   string `json:"campo"`
 	Mensaje string `json:"mensaje"`
 }
 
-// ClienteConErrores representa un cliente con sus errores de validación
+
 type ClienteConErrores struct {
 	Cliente models.Cliente  `json:"cliente"`
 	Errores []ErrorCampo    `json:"errores"`
 	TieneErrores bool        `json:"tieneErrores"`
 }
 
-// ValidarClave valida que la clave contenga solo números
+
 func ValidarClave(clave string) string {
 	if clave == "" {
 		return "La clave es requerida"
 	}
 	
-	// Validar que solo contenga números
+	
 	matched, _ := regexp.MatchString(`^\d+$`, clave)
 	if !matched {
 		return "La clave debe contener únicamente números"
@@ -36,13 +35,13 @@ func ValidarClave(clave string) string {
 	return ""
 }
 
-// ValidarNombreContacto valida que el nombre no contenga números
+
 func ValidarNombreContacto(nombre string) string {
 	if nombre == "" {
 		return "El nombre de contacto es requerido"
 	}
 	
-	// Validar que no contenga números
+	
 	matched, _ := regexp.MatchString(`\d`, nombre)
 	if matched {
 		return "El nombre de contacto no debe contener números"
@@ -51,19 +50,19 @@ func ValidarNombreContacto(nombre string) string {
 	return ""
 }
 
-// ValidarCorreo valida que el correo tenga un dominio conocido
+
 func ValidarCorreo(correo string) string {
 	if correo == "" {
 		return "El correo es requerido"
 	}
 	
-	// Validar formato básico de correo
+	
 	emailRegex := regexp.MustCompile(`^[^\s@]+@[^\s@]+\.[^\s@]+$`)
 	if !emailRegex.MatchString(correo) {
 		return "Formato de correo inválido"
 	}
 	
-	// Dominios conocidos más populares
+
 	dominiosConocidos := []string{
 		"gmail.com", "hotmail.com", "outlook.com", "yahoo.com", 
 		"live.com", "icloud.com", "aol.com", "protonmail.com", 
@@ -71,7 +70,7 @@ func ValidarCorreo(correo string) string {
 		"tutanota.com", "fastmail.com", "rocketmail.com",
 	}
 	
-	// Extraer dominio
+
 	parts := strings.Split(correo, "@")
 	if len(parts) != 2 {
 		return "Formato de correo inválido"
@@ -79,18 +78,18 @@ func ValidarCorreo(correo string) string {
 	
 	dominio := strings.ToLower(parts[1])
 	
-	// Verificar si es un dominio conocido
+
 	for _, dominioConocido := range dominiosConocidos {
 		if dominio == dominioConocido {
 			return ""
 		}
 	}
 	
-	// Si no es un dominio conocido, verificar si parece ser un dominio empresarial válido
+	
 	if strings.Contains(dominio, ".") {
 		partesDominio := strings.Split(dominio, ".")
 		if len(partesDominio) >= 2 && len(partesDominio[len(partesDominio)-1]) >= 2 {
-			// Podría ser un dominio empresarial válido, pero advertimos
+			
 			return "Se recomienda usar un proveedor de correo conocido"
 		}
 	}
@@ -98,30 +97,72 @@ func ValidarCorreo(correo string) string {
 	return "Por favor utiliza un servicio de correo conocido"
 }
 
-// ValidarTelefono valida que el teléfono tenga exactamente 10 dígitos
+
 func ValidarTelefono(telefono string) string {
 	if telefono == "" {
 		return "El teléfono es requerido"
 	}
 	
-	// Eliminar espacios, guiones y paréntesis para validar
+	
 	telefonoLimpio := regexp.MustCompile(`[\s\-\(\)]+`).ReplaceAllString(telefono, "")
 	
-	// Validar que solo contenga números
+	
 	matched, _ := regexp.MatchString(`^\d+$`, telefonoLimpio)
 	if !matched {
 		return "El teléfono debe contener únicamente números (se permiten espacios, guiones y paréntesis)"
 	}
 	
-	// Validar que tenga exactamente 10 dígitos (incluyendo lada)
-	if len(telefonoLimpio) != 10 {
-		return "El teléfono debe tener exactamente 10 dígitos incluyendo lada"
+	
+	if len(telefonoLimpio) < 10 {
+		return "El teléfono debe tener al menos 10 dígitos incluyendo lada"
+	}
+	
+	
+	codigosChiapas := []string{
+		"961", // Tuxtla Gutiérrez
+		"962", // San Cristóbal de las Casas, Comitán
+		"963", // Tapachula
+		"964", // Palenque
+		"965", // Tonalá
+		"966", // Arriaga, Pijijiapan
+		"967", // Las Margaritas, Altamirano
+		"968", // Villaflores, Villa Corzo
+		"992", // Reforma (parte de Chiapas)
+		"994", // Mapastepec
+	}
+	
+	
+	tieneCodigoChiapas := false
+	codigoEncontrado := ""
+	
+	for _, codigo := range codigosChiapas {
+		if strings.HasPrefix(telefonoLimpio, codigo) {
+			tieneCodigoChiapas = true
+			codigoEncontrado = codigo
+			break
+		}
+	}
+	
+	if !tieneCodigoChiapas {
+		return "El teléfono debe ser de Chiapas. Códigos válidos: 961 (Tuxtla Gutiérrez), 962 (San Cristóbal), 963 (Tapachula), 964 (Palenque), 965 (Tonalá), 966 (Arriaga), 967 (Las Margaritas), 968 (Villaflores), 992 (Reforma), 994 (Mapastepec)"
+	}
+	
+	
+	longitudEsperada := 10
+	if len(telefonoLimpio) != longitudEsperada {
+		return "El teléfono debe tener exactamente 10 dígitos (3 de lada + 7 de número local)"
+	}
+	
+	
+	numeroLocal := telefonoLimpio[3:]
+	if len(numeroLocal) != 7 {
+		return "Después del código de área (" + codigoEncontrado + ") debe haber exactamente 7 dígitos"
 	}
 	
 	return ""
 }
 
-// ValidarCliente valida todos los campos de un cliente
+
 func ValidarCliente(cliente models.Cliente) []ErrorCampo {
 	var errores []ErrorCampo
 	
@@ -144,7 +185,7 @@ func ValidarCliente(cliente models.Cliente) []ErrorCampo {
 	return errores
 }
 
-// GetClientesConErrores obtiene todos los clientes y sus errores de validación
+
 func GetClientesConErrores() ([]ClienteConErrores, error) {
 	clientes, err := GetClientes()
 	if err != nil {
@@ -166,7 +207,7 @@ func GetClientesConErrores() ([]ClienteConErrores, error) {
 	return clientesConErrores, nil
 }
 
-// GetClientesConErroresSolo obtiene solo los clientes que tienen errores
+
 func GetClientesConErroresSolo() ([]ClienteConErrores, error) {
 	clientesConErrores, err := GetClientesConErrores()
 	if err != nil {
@@ -183,7 +224,7 @@ func GetClientesConErroresSolo() ([]ClienteConErrores, error) {
 	return soloConErrores, nil
 }
 
-// BuscarClientesConErrores busca clientes y retorna con información de errores
+
 func BuscarClientesConErrores(termino string) ([]ClienteConErrores, error) {
 	clientes, err := BuscarClientes(termino)
 	if err != nil {
